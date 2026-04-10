@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Vendor" ADD COLUMN     "rating" DOUBLE PRECISION NOT NULL DEFAULT 4.5;
