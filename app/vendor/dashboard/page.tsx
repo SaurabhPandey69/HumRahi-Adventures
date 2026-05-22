@@ -557,7 +557,7 @@ Check-out: ${eventInfo.event.endStr}`}
         </button>
 
         <button
-          onClick={() => markCompleted(booking.id)}
+          onClick={() => markCompleted(selectedBooking.id)}
           className="bg-blue-600 text-white py-2 rounded"
         >
           Mark Completed

@@ -268,7 +268,7 @@ export default function AISection() {
                 return;
               }
 
-              router.push(`/checkout?draftId=${result.draftId}`);
+              router.push(`/traveler-details?draftId=${result.draftId}`);
             }}
             className="mt-6 bg-black text-white px-6 py-3 rounded-lg w-full hover:bg-gray-800 transition"
           >

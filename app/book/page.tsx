@@ -131,7 +131,25 @@ export default function Book() {
       });
 
       alert("Phone verified 🎉");
-      router.push("/checkout");
+      // 🔥 Create booking draft first
+const res = await fetch("/api/ai-recommend", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    name,
+    phone,
+    package: pkg,
+  }),
+});
+
+const data = await res.json();
+
+console.log("🔥 Draft created:", data);
+
+// ✅ Redirect to traveler details page
+router.push(`/traveler-details?draftId=${draftId}`);
     } catch {
       alert("Invalid OTP ❌");
     } finally {

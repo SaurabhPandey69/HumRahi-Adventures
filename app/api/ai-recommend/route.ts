@@ -105,11 +105,20 @@ Return format:
       //  durationDays: parsed.duration_days,
       // });
 
-      let pricing = {
-        totalCost: 0,
-        pricePerPerson: 0,
-        breakdown: [],
-      };
+let pricing: {
+  totalCost: number;
+  pricePerPerson: number;
+
+  breakdown: {
+    vendor: any;
+    category: string;
+    cost: number;
+  }[];
+} = {
+  totalCost: 0,
+  pricePerPerson: 0,
+  breakdown: [],
+};
 
       if (vendors.length > 0) {
         pricing = await calculateDynamicPackage({

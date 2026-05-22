@@ -15,87 +15,64 @@ model Event {
 }
 
 model Vendor {
-  id                    String   @id @default(uuid())
-
-  authUserId            String   @unique
-
+  id                    String               @id @default(uuid())
   name                  String
   category              String
   city                  String
-
   basePrice             Float
-  rating                Float   @default(4.5) // 🔥 NEW FIELD ADDED
-
-  pricePerPerson        Boolean  @default(true)
-
-  serviceTypes          Json?
-  isFullPackageProvider Boolean  @default(false)
-
   luxuryLevel           String
+  autoBookingSupported  Boolean              @default(false)
+  createdAt             DateTime             @default(now())
   capacity              Int?
-
+  contactEmail          String?
   contactName           String?
   contactPhone          String?
-  contactEmail          String?
-
+  isActive              Boolean              @default(true)
+  isFullPackageProvider Boolean              @default(false)
+  notes                 String?
+  pricePerPerson        Boolean              @default(true)
+  serviceTypes          Json?
+  isApproved            Boolean              @default(false)
+  authUserId            String               @unique
   gstNumber             String?
   licenseUrl            String?
-  phoneVerified         Boolean  @default(false)
-  profileCompleted      Boolean  @default(false)
-
-  inviteSent            Boolean  @default(false)
-  onboardingCompleted   Boolean  @default(false)
-
-  autoBookingSupported  Boolean  @default(false)
-  isActive              Boolean  @default(true)
-
-  isApproved            Boolean  @default(false)
-
-  notes                 String?
-
-  createdAt             DateTime @default(now())
-
+  phoneVerified         Boolean              @default(false)
+  profileCompleted      Boolean              @default(false)
+  inviteSent            Boolean              @default(false)
+  onboardingCompleted   Boolean              @default(false)
+  rating                Float                @default(4.5)
   availability          VendorAvailability[]
 }
 
 model VendorAvailability {
   id        String   @id @default(uuid())
   vendorId  String
-
-  // 🔥 FIXED (NO TIMEZONE BUG)
-  date      String   // ✅ YYYY-MM-DD format
-
+  date      String
   available Boolean  @default(true)
-
-  vendor Vendor @relation(fields: [vendorId], references: [id])
-
   createdAt DateTime @default(now())
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
 
-  // 🔥 STILL SAFE (string unique)
   @@unique([vendorId, date])
 }
 
 model PackageTemplate {
-  id           String   @id @default(uuid())
-  name         String
-  baseDuration Int
-  baseCity     String
-  createdAt    DateTime @default(now())
-
+  id             String          @id @default(uuid())
+  name           String
+  baseDuration   Int
+  baseCity       String
+  createdAt      DateTime        @default(now())
   itinerarySteps ItineraryStep[]
 }
 
 model ItineraryStep {
-  id             String   @id @default(uuid())
+  id             String          @id @default(uuid())
   packageId      String
   dayNumber      Int
   activityType   String
   city           String
   vendorCategory String
-
-  package PackageTemplate @relation(fields: [packageId], references: [id])
-
-  createdAt DateTime @default(now())
+  createdAt      DateTime        @default(now())
+  package        PackageTemplate @relation(fields: [packageId], references: [id])
 }
 
 model BookingDraft {
@@ -107,10 +84,8 @@ model BookingDraft {
   pricePerPerson Float
   durationDays   Int
   breakdown      Json
-
-  bookingDate    DateTime
-
   createdAt      DateTime @default(now())
+  bookingDate    DateTime
 }
 
 model PhoneOtp {
@@ -123,26 +98,38 @@ model PhoneOtp {
   createdAt DateTime @default(now())
 }
 
-//
-// 🔥 NEW MODEL (BOOKING SYSTEM)
-//
-model Booking {
+model EmailOtp {
   id        String   @id @default(uuid())
-  vendorId  String
-  userName  String
-  phone     String
-  date      DateTime
-  status    String   @default("CONFIRMED")
-  cancelReason String?
-  cancelRequested Boolean @default(false)
-  rejectReason    String?   // 🔥 REQUIRED
+
+  email     String
+  otp       String
+
+  expiresAt DateTime
+
+  attempts  Int      @default(0)
+
+  verified  Boolean  @default(false)
+
   createdAt DateTime @default(now())
+}
+
+model Booking {
+  id              String   @id @default(uuid())
+  vendorId        String
+  userName        String
+  phone           String
+  date            DateTime
+  status          String   @default("CONFIRMED")
+  createdAt       DateTime @default(now())
+  cancelReason    String?
+  cancelRequested Boolean  @default(false)
+  rejectReason    String?
 }
 
 model FeedbackRequest {
   id        String   @id @default(uuid())
   bookingId String
-  status    String   // PENDING / SUBMITTED
+  status    String
   createdAt DateTime @default(now())
 }
 
@@ -151,8 +138,56 @@ model Review {
   bookingId String
   vendorId  String
   rating    Int
-  review    String
   comment   String
   userName  String
   createdAt DateTime @default(now())
+  review    String
+}
+
+model BookingGroup {
+  id                String            @id @default(uuid())
+  packageName       String
+  totalAmount       Float
+  bookingDate       DateTime
+  status            String            @default("CONFIRMED")
+  leadTravelerName  String
+  leadTravelerPhone String
+  leadTravelerEmail String
+  itinerary         Json?
+  createdAt         DateTime          @default(now())
+  draftId           String?
+  razorpayPaymentId String?
+  bookingActivities BookingActivity[]
+  travelers         Traveler[]
+}
+
+model Traveler {
+  id              String       @id @default(uuid())
+  bookingId       String
+  fullName        String
+  email           String
+  phone           String
+  age             Int
+  gender          String
+  aadhaarNumber   String?
+  medicalIssues   String?
+  emergencyPhone  String?
+  isPhysicallyFit Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  govIdType       String?
+  govIdNumber     String?
+  booking         BookingGroup @relation(fields: [bookingId], references: [id])
+}
+
+model BookingActivity {
+  id           String       @id @default(uuid())
+  bookingId    String
+  activityName String
+  activityDate DateTime
+  vendorName   String
+  vendorPhone  String
+  vendorEmail  String
+  slotTiming   String
+  createdAt    DateTime     @default(now())
+  booking      BookingGroup @relation(fields: [bookingId], references: [id])
 }

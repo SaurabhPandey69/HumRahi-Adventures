@@ -15,13 +15,20 @@ export async function POST(req: Request) {
     });
 
     // 🔥 AUTO BLOCK DATE
-    await prisma.vendorAvailability.create({
-      data: {
-        vendorId: body.vendorId,
-        date: new Date(body.date),
-        available: false,
-      },
-    });
+const formattedDate =
+  new Date(body.date).getFullYear() +
+  "-" +
+  String(new Date(body.date).getMonth() + 1).padStart(2, "0") +
+  "-" +
+  String(new Date(body.date).getDate()).padStart(2, "0");
+
+await prisma.vendorAvailability.create({
+  data: {
+    vendorId: body.vendorId,
+    date: formattedDate,
+    available: false,
+  },
+});
 
     return NextResponse.json(booking);
 

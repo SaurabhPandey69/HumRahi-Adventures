@@ -16,6 +16,11 @@ export async function POST(req: Request) {
       },
     });
 
+    // 🔍 vendor fetch once (reuse everywhere)
+    const vendor = await prisma.vendor.findUnique({
+      where: { id: booking.vendorId },
+    });
+
     // 🔥 ONLY ADMIN APPROVED CANCEL triggers availability free
     if (body.status === "CANCELLED") {
       const formattedDate =
@@ -41,25 +46,52 @@ export async function POST(req: Request) {
           available: true,
         },
       });
+    
+      // ✅ EMAIL (CANCEL APPROVED)
+      if (vendor?.contactEmail) {
+        await sendEmail(
+          vendor.contactEmail,
+          "Cancellation Approved ✅",
+          `
+          <h2>Cancellation Approved</h2>
+          <p>Your booking has been successfully cancelled.</p>
+          <p><b>Date:</b> ${booking.date.toDateString()}</p>
+          `
+        );
+      }
     }
-
+    
     // ============================
     // 🟡 REJECT CASE
     // ============================
     if (body.rejectReason) {
-      const vendor = await prisma.vendor.findUnique({
-        where: { id: booking.vendorId },
-      });
-
       if (vendor?.contactEmail) {
         await sendEmail(
           vendor.contactEmail,
           "Cancellation Request Rejected ❌",
-          `Your cancellation request has been rejected.
+         `<h2>Cancellation Rejected</h2>
+          <p>Your cancellation request was rejected.</p>
+          <p><b>Reason:</b> ${body.rejectReason}</p>
+          <p><b>Date:</b> ${booking.date.toDateString()}</p>
+          `
+        );
+      }
+    }
 
-Reason: ${body.rejectReason}
-
-Booking Date: ${booking.date.toDateString()}`
+    // ============================
+    // 🔵 BOOKING APPROVED (NEW)
+    // ============================
+    if (body.status === "CONFIRMED") {
+      if (vendor?.contactEmail) {
+        await sendEmail(
+          vendor.contactEmail,
+          "Booking Confirmed 🎉",
+          `
+          <h2>Booking Confirmed</h2>
+          <p>You have a new confirmed booking.</p>
+          <p><b>Customer:</b> ${booking.userName}</p>
+          <p><b>Date:</b> ${booking.date.toDateString()}</p>
+          `
         );
       }
     }
@@ -67,7 +99,7 @@ Booking Date: ${booking.date.toDateString()}`
     return NextResponse.json(booking);
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ Update Error:", error);
 
     return NextResponse.json(
       { error: "Update failed" },
