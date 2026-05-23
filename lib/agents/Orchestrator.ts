@@ -76,10 +76,19 @@ export class AgentOrchestrator {
     try {
       const result = await agent.planTrip(task.data);
       this.storeResult(task.id, result);
+    
     } catch (error) {
-      console.error(`Task ${task.id} failed:`, error);
-      this.storeResult(task.id, { error: error.message });
-    }
+  console.error(`Task ${task.id} failed:`, error);
+
+  const message =
+    error instanceof Error
+      ? error.message
+      : "Unknown error";
+
+  this.storeResult(task.id, {
+    error: message,
+  });
+}
   }
   
   private completedTasks: Map<string, any> = new Map();
