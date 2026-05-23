@@ -7,6 +7,10 @@ export async function POST(req: Request) {
 
     const vendor = await prisma.vendor.create({
       data: {
+        // ✅ REQUIRED FIELD
+        authUserId:
+          body.authUserId ||
+          crypto.randomUUID(),
         name: body.name,
         category: body.category,
         city: body.city,
@@ -21,11 +25,17 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(vendor);
+    return NextResponse.json({
+      success: true,
+      vendor,
+    });
   } catch (error) {
     console.error("Vendor Registration Error:", error);
     return NextResponse.json(
-      { error: "Vendor registration failed" },
+      {
+        success: false,
+        message: "Vendor registration failed",
+      },
       { status: 500 }
     );
   }
