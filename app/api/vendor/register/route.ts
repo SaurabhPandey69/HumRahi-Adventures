@@ -8,21 +8,27 @@ export async function POST(req: Request) {
 
     const vendor = await prisma.vendor.create({
       data: {
-        // ✅ REQUIRED FIELD
         authUserId:
           body.authUserId ||
           crypto.randomUUID(),
+
         name: body.name,
+
         category: body.category,
+
         city: body.city,
-        basePrice: Number(body.basePrice),
+
+        basePrice: Number(body.basePrice || 0),
+
         luxuryLevel: body.luxuryLevel,
+
         contactPhone: body.contactPhone,
+
         contactEmail: body.contactEmail,
 
-        // ✅ Admin Approval System
-        isApproved: false,   // Vendor must be approved manually
-        isActive: true,      // Vendor account exists but not approved yet
+        isApproved: false,
+
+        isActive: true,
       },
     });
 
@@ -30,8 +36,10 @@ export async function POST(req: Request) {
       success: true,
       vendor,
     });
+
   } catch (error) {
-    console.error("Vendor Registration Error:", error);
+    console.error("Vendor register error:", error);
+
     return NextResponse.json(
       {
         success: false,
