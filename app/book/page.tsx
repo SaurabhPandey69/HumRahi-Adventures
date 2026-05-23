@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import {
   RecaptchaVerifier,
@@ -14,11 +14,11 @@ import { trackEvent } from "@/lib/trackEvent";
 
 export default function Book() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
 
   // 🔥 AI Prefill
-  const selectedPackage = searchParams.get("package");
+  const [selectedPackage, setSelectedPackage] =
+  useState<string | null>(null);
   const fromAI = selectedPackage ? true : false;
 
   const [name, setName] = useState("");
@@ -32,8 +32,18 @@ export default function Book() {
   // =========================
   // ✅ Create Recaptcha ONLY ONCE
   // =========================
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  const pkg = params.get("package");
+
+  setSelectedPackage(pkg);
+
+}, []);
 
     if (!recaptchaRef.current) {
       recaptchaRef.current = new RecaptchaVerifier(
