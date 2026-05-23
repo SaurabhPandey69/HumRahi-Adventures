@@ -148,8 +148,17 @@ const data = await res.json();
 
 console.log("🔥 Draft created:", data);
 
+// ✅ IMPORTANT
+const draftId = data.draftId;
+
+if (!draftId) {
+  alert("Draft creation failed ❌");
+  return;
+}
+
 // ✅ Redirect to traveler details page
 router.push(`/traveler-details?draftId=${draftId}`);
+
     } catch {
       alert("Invalid OTP ❌");
     } finally {
