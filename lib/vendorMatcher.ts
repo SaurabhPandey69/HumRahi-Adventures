@@ -26,7 +26,7 @@ export async function matchVendors(input: MatchInput) {
   };
 
   const allowedLuxury =
-  (luxuryMap[input.stayType] || ["Basic"]).map((l) =>
+  (luxuryMap[input.stayType] || ["Basic"]).map((l: string) =>
     l.toLowerCase()
   );
 
