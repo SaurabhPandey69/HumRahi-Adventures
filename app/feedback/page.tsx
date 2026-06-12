@@ -1,11 +1,25 @@
 "use client";
-
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+export const dynamic = "force-dynamic";
+// import { useState } from "react";
+// import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function FeedbackPage() {
-  const params = useSearchParams();
-  const bookingId = params.get("bookingId");
+  // const params = useSearchParams();
+  // const bookingId = params.get("bookingId");
+  const [bookingId, setBookingId] =
+  useState<string | null>(null);
+
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  setBookingId(params.get("bookingId"));
+
+}, []);
 
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
