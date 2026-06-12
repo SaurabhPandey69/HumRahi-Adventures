@@ -1,8 +1,8 @@
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/trackEvent";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -22,9 +22,22 @@ export default function Checkout() {
   }, []);
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const draftId = searchParams.get("draftId");
+  const [draftId, setDraftId] = useState<string | null>(null);
+
+  useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  setDraftId(params.get("draftId"));
+
+}, []);
+  // const searchParams = useSearchParams();
+
+  // const draftId = searchParams.get("draftId");
   const [loading, setLoading] = useState(false);
 
   // 🔥 Fire checkout_view event

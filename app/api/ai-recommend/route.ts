@@ -82,12 +82,21 @@ Return format:
       //  bookingDate: new Date(bookingDate),
       // });
       //----------------------------------------
-     
+      
       // 🔥 LOCATION NORMALIZATION
+
+      const location =
+        body.location ||
+        body.destination ||
+        "";
+
+      
       let normalizedLocation = location;
-      if (location.toLowerCase().includes("bhadraj")) {
+
+      if (location && location.toLowerCase().includes("bhadraj")) {
         normalizedLocation = "Dehradun";
       }
+      
       // 🔥 USE NORMALIZED LOCATION
       const vendors = await matchVendors({
         location: normalizedLocation,
