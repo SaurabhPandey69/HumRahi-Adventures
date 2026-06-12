@@ -1,7 +1,10 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+// import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 interface BreakdownItem {
@@ -70,10 +73,23 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function ReviewPage() {
-  const params = useSearchParams();
+  // const params = useSearchParams();
+  // const router = useRouter();
+  // const draftId = params.get("draftId");
   const router = useRouter();
-  const draftId = params.get("draftId");
 
+const [draftId, setDraftId] =
+  useState<string | null>(null);
+  useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  setDraftId(params.get("draftId"));
+
+}, []);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [loading, setLoading] = useState(true);
 
