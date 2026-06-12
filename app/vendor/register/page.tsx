@@ -1,27 +1,31 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function VendorRegister() {
-  const { data: session } = useSession();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (session) {
-      router.push("/vendor/form");
-    }
-  }, [session]);
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo:
+          `${window.location.origin}/vendor/form`,
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
+
       <button
-        onClick={() => signIn("google")}
+        onClick={handleGoogleLogin}
         className="bg-black text-white px-6 py-3 rounded-lg"
       >
         Continue with Google
       </button>
+
     </div>
   );
 }
