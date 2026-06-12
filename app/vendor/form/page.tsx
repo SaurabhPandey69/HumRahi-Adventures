@@ -1,10 +1,27 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useState } from "react";
+// import { useSession } from "next-auth/react";
+// import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
 export default function VendorForm() {
-  const { data: session } = useSession();
+  // const { data: session } = useSession();
+     const [email, setEmail] = useState("");
+
+     useEffect(() => {
+  const loadUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  };
+
+  loadUser();
+}, []);
 
   const [form, setForm] = useState({
     name: "",
@@ -26,7 +43,8 @@ export default function VendorForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        contactEmail: session?.user?.email,
+        // contactEmail: session?.user?.email,
+        contactEmail: email,
       }),
     });
 
