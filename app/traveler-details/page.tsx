@@ -1,7 +1,10 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+// import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────
@@ -213,10 +216,14 @@ function OtpVerifier({
 
 // ─── Main Page ────────────────────────────────────────────
 export default function TravelerDetailsPage() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const draftId = params.get("draftId");
+  // const params = useSearchParams();
+  // const router = useRouter();
+  // const draftId = params.get("draftId");
 
+  const router = useRouter();
+
+  const [draftId, setDraftId] =
+   useState<string | null>(null);
   const [step, setStep] = useState<"verify" | "details">("verify");
   const [leadTraveler, setLeadTraveler] = useState<LeadTraveler>({
     name: "",
@@ -230,6 +237,17 @@ export default function TravelerDetailsPage() {
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  
+  useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  setDraftId(params.get("draftId"));
+
+}, []);
 
   // Sync traveler array length
   useEffect(() => {
