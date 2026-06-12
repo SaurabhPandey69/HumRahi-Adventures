@@ -1,13 +1,36 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react"; // 🔥 ADDED
+// import { useRouter, useSearchParams } from "next/navigation";
+// import { useEffect } from "react"; // 🔥 ADDED
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function InvitePage() {
-  const router = useRouter();
-  const params = useSearchParams();
-  const invitedEmail = params.get("email");
+  // const router = useRouter();
+  // const params = useSearchParams();
+  // const invitedEmail = params.get("email");
+     
+      const router = useRouter();
+
+const [invitedEmail, setInvitedEmail] =
+  useState<string | null>(null);
+
+     useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  setInvitedEmail(
+    params.get("email")
+  );
+
+}, []);
+
+
 
   // ✅ Google Login (UPDATED redirect)
   const handleGoogleLogin = async () => {
