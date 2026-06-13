@@ -95,6 +95,16 @@ export default function Checkout() {
       }
 
       const orderData = await orderRes.json();
+      
+      console.log(
+        "Frontend Razorpay Key:",
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+      );
+
+      if (!orderData?.orderId) {
+        alert("Failed to create payment order");
+        return;
+      }
 
       if (!orderData?.orderId) {
         alert("Failed to create payment order");

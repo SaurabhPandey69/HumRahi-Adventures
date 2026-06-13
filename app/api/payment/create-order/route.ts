@@ -4,6 +4,14 @@ import { prisma } from "@/lib/prisma";
 
 const isProd = process.env.NODE_ENV === "production";
 
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log(
+  "Using Key:",
+  isProd
+    ? process.env.RAZORPAY_KEY_ID_LIVE
+    : process.env.RAZORPAY_KEY_ID_TEST
+);
+
 const razorpay = new Razorpay({
   key_id: isProd
     ? process.env.RAZORPAY_KEY_ID_LIVE!
