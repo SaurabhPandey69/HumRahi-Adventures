@@ -28,8 +28,14 @@ export async function POST(req: Request) {
       await supabaseAdmin.auth.admin.inviteUserByEmail(
         body.contactEmail,
         {
+          // redirectTo:
+          //   "http://localhost:3000/vendor/complete-registration",
+
+          // redirectTo: `${window.location.origin}/vendor/complete-registration`,
+          
           redirectTo:
-            "http://localhost:3000/vendor/complete-registration",
+            `${process.env.APP_URL}/vendor/complete-registration`,
+
         }
       );
 

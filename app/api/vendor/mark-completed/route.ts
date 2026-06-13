@@ -29,9 +29,19 @@ export async function POST(req: Request) {
     });
 
     // 🔔 3️⃣ Send feedback link (for now console)
+    
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "https://hum-rahi-adventures.vercel.app";
+
     console.log("Send this to customer 👇");
+    // console.log(
+    //   // `http://localhost:3000/feedback?bookingId=${booking.id}`
+    //   `${window.location.origin}/feedback?bookingId=${booking.id}`
+    // );
+    
     console.log(
-      `http://localhost:3000/feedback?bookingId=${booking.id}`
+      `${baseUrl}/feedback?bookingId=${booking.id}`
     );
     
     return NextResponse.json({

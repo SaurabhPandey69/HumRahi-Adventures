@@ -68,6 +68,11 @@ export async function sendVendorEmail(vendor: any, booking: any) {
 // =====================================
 export async function sendHotLeadEmail(email: string) {
   try {
+
+    const baseUrl =
+      process.env.APP_URL ||
+      "https://hum-rahi-adventures.vercel.app";
+      
     console.log("📤 Sending hot lead email to:", email);
 
     const info = await transporter.sendMail({
@@ -80,7 +85,7 @@ export async function sendHotLeadEmail(email: string) {
         
         <p><b>Don't miss your adventure!</b></p>
 
-        <a href="http://localhost:3000/checkout"
+        <a href="${baseUrl}/checkout?draftId=${draftId}"
            style="
              display:inline-block;
              padding:10px 20px;

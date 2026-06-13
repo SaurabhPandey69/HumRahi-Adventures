@@ -21,7 +21,10 @@ export async function POST(req: Request) {
     // 🟡 + 🟢 — Try invite
     const { error } =
       await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        redirectTo: `http://localhost:3000/vendor/invite?email=${email}`,
+        // redirectTo: `http://localhost:3000/vendor/invite?email=${email}`,
+        // redirectTo: `${window.location.origin}/vendor/invite?email=${email}`
+        redirectTo:
+      `${process.env.APP_URL}/vendor/invite?email=${encodeURIComponent(email)}`,  
       });
 
     // 🟡 CASE — Already in Supabase
