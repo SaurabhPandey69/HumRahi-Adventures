@@ -16,7 +16,8 @@ export default function VendorLogin() {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "http://localhost:3000/vendor/login",
+          // redirectTo: "http://localhost:3000/vendor/login",
+          redirectTo: `${window.location.origin}/vendor/login`,
         },
       });
     } catch (error) {
