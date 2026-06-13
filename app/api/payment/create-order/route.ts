@@ -2,23 +2,43 @@ import Razorpay from "razorpay";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-const isProd = process.env.NODE_ENV === "production";
+// =====================================
+// 🔥 Production Live MODE
+// =====================================
 
-console.log("NODE_ENV:", process.env.NODE_ENV);
+// const isProd = process.env.NODE_ENV === "production";
+
+// console.log("NODE_ENV:", process.env.NODE_ENV);
+// console.log(
+//   "Using Key:",
+//   isProd
+//     ? process.env.RAZORPAY_KEY_ID_LIVE
+//     : process.env.RAZORPAY_KEY_ID_TEST
+// );
+
+// const razorpay = new Razorpay({
+//   key_id: isProd
+//     ? process.env.RAZORPAY_KEY_ID_LIVE!
+//     : process.env.RAZORPAY_KEY_ID_TEST!,
+//   key_secret: isProd
+//     ? process.env.RAZORPAY_KEY_SECRET_LIVE!
+//     : process.env.RAZORPAY_KEY_SECRET_TEST!,
+// });
+
+// =====================================
+// ✅ FORCE TEST MODE
+// =====================================
+
+console.log("🔥 FORCE TEST MODE ENABLED");
+
 console.log(
-  "Using Key:",
-  isProd
-    ? process.env.RAZORPAY_KEY_ID_LIVE
-    : process.env.RAZORPAY_KEY_ID_TEST
+  "Using Test Key:",
+  process.env.RAZORPAY_KEY_ID_TEST
 );
 
 const razorpay = new Razorpay({
-  key_id: isProd
-    ? process.env.RAZORPAY_KEY_ID_LIVE!
-    : process.env.RAZORPAY_KEY_ID_TEST!,
-  key_secret: isProd
-    ? process.env.RAZORPAY_KEY_SECRET_LIVE!
-    : process.env.RAZORPAY_KEY_SECRET_TEST!,
+  key_id: process.env.RAZORPAY_KEY_ID_TEST!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET_TEST!,
 });
 
 export async function POST(req: Request) {
