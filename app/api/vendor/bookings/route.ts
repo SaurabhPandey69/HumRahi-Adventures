@@ -18,113 +18,192 @@ export async function GET(req: Request) {
       );
     }
 
-    const bookings = await prisma.booking.findMany({
-      where: {
-        vendorId,
-      },
+    // const bookings = await prisma.booking.findMany({
+    //   where: {
+    //     vendorId,
+    //   },
 
-      orderBy: {
-        date: "asc",
-      },
-    });
+    //   orderBy: {
+    //     date: "asc",
+    //   },
+    // });
+
+    // Fetch vendor + bookings in a single transaction (2 queries, 1 connection)
+    const [vendor, bookings] = await prisma.$transaction([
+      prisma.vendor.findUnique({ where: { id: vendorId } }),
+      prisma.booking.findMany({
+        where: { vendorId },
+        orderBy: { date: "asc" },
+      }),
+    ]);
+
+    if (!vendor) return NextResponse.json([]);
 
     console.log("Bookings Count:", bookings.length);
-    
 
-    // 🔥 Enrich bookings
+     // ✅ Process in small batches of 5 instead of all at once
+    const enriched = [];
+    const BATCH_SIZE = 5;
 
-    const vendor = await prisma.vendor.findUnique({
-          where: {
-            id: vendorId,
-          },
-        });
-    
-    if (!vendor) {
-      return NextResponse.json([]);
-    }
+    for (let i = 0; i < bookings.length; i += BATCH_SIZE) {
+      const batch = bookings.slice(i, i + BATCH_SIZE);
 
-    const enriched = await Promise.all(
-      bookings.map(async (booking) => {
-        
-        const activity = vendor
-          ? await prisma.bookingActivity.findFirst({
-              where: {
-                vendorName: vendor.name,
-                activityDate: booking.date,
-              },
-
-              orderBy: {
-                createdAt: "desc",
-              },
-            })
-          : null;
-
-        let bookingGroup = null;
-        let travelers: any[] = [];
-
-        if (activity) {
-          bookingGroup = await prisma.bookingGroup.findUnique({
+      const batchResults = await Promise.all(
+        batch.map(async (booking) => {
+          // These two queries are sequential per booking
+          const activity = await prisma.bookingActivity.findFirst({
             where: {
-              id: activity.bookingId,
+              vendorName: vendor.name,
+              activityDate: booking.date,
             },
-
-            include: {
-              travelers: true,
-            },
+            orderBy: { createdAt: "desc" },
           });
 
-          travelers = bookingGroup?.travelers || [];
-        }
+          let bookingGroup = null;
+          let travelers: any[] = [];
 
-        return {
-          ...booking,
+          if (activity) {
+            bookingGroup = await prisma.bookingGroup.findUnique({
+              where: { id: activity.bookingId },
+              include: { travelers: true },
+            });
+            travelers = bookingGroup?.travelers || [];
+          }
 
-          bookingGroupId: bookingGroup?.id || null,
+          return {
+            ...booking,
+            bookingGroupId: bookingGroup?.id || null,
+            packageName: bookingGroup?.packageName || null,
+            totalAmount: bookingGroup?.totalAmount || null,
+            leadTravelerName:
+              bookingGroup?.leadTravelerName || booking.userName,
+            leadTravelerPhone:
+              bookingGroup?.leadTravelerPhone || booking.phone,
+            leadTravelerEmail: bookingGroup?.leadTravelerEmail || null,
+            travelerCount: travelers.length || 1,
+            travelers: travelers.map((t) => ({
+              id: t.id,
+              fullName: t.fullName,
+              email: t.email,
+              phone: t.phone,
+              age: t.age,
+              gender: t.gender,
+              medicalIssues: t.medicalIssues,
+              emergencyPhone: t.emergencyPhone,
+            })),
+            activityName: activity?.activityName || null,
+            slotTiming: activity?.slotTiming || null,
+          };
+        })
+      );
 
-          packageName: bookingGroup?.packageName || null,
-
-          totalAmount: bookingGroup?.totalAmount || null,
-
-          leadTravelerName:
-            bookingGroup?.leadTravelerName || booking.userName,
-
-          leadTravelerPhone:
-            bookingGroup?.leadTravelerPhone || booking.phone,
-
-          leadTravelerEmail:
-            bookingGroup?.leadTravelerEmail || null,
-
-          travelerCount: travelers.length || 1,
-
-          travelers: travelers.map((t) => ({
-            id: t.id,
-            fullName: t.fullName,
-            email: t.email,
-            phone: t.phone,
-            age: t.age,
-            gender: t.gender,
-            medicalIssues: t.medicalIssues,
-            emergencyPhone: t.emergencyPhone,
-          })),
-
-          activityName: activity?.activityName || null,
-
-          slotTiming: activity?.slotTiming || null,
-        };
-      })
-    );
+      enriched.push(...batchResults);
+    }
 
     return NextResponse.json(enriched);
 
   } catch (error) {
     console.error("Vendor bookings error:", error);
-
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to fetch bookings",
-      },
+      { success: false, message: "Failed to fetch bookings" },
       { status: 500 }
     );
   }
 }
+    // 🔥 Enrich bookings
+
+    // const vendor = await prisma.vendor.findUnique({
+    //       where: {
+    //         id: vendorId,
+    //       },
+    //     });
+    
+    // if (!vendor) {
+    //   return NextResponse.json([]);
+    // }
+
+  //   const enriched = await Promise.all(
+  //     bookings.map(async (booking) => {
+        
+  //       const activity = vendor
+  //         ? await prisma.bookingActivity.findFirst({
+  //             where: {
+  //               vendorName: vendor.name,
+  //               activityDate: booking.date,
+  //             },
+
+  //             orderBy: {
+  //               createdAt: "desc",
+  //             },
+  //           })
+  //         : null;
+
+  //       let bookingGroup = null;
+  //       let travelers: any[] = [];
+
+  //       if (activity) {
+  //         bookingGroup = await prisma.bookingGroup.findUnique({
+  //           where: {
+  //             id: activity.bookingId,
+  //           },
+
+  //           include: {
+  //             travelers: true,
+  //           },
+  //         });
+
+  //         travelers = bookingGroup?.travelers || [];
+  //       }
+
+  //       return {
+  //         ...booking,
+
+  //         bookingGroupId: bookingGroup?.id || null,
+
+  //         packageName: bookingGroup?.packageName || null,
+
+  //         totalAmount: bookingGroup?.totalAmount || null,
+
+  //         leadTravelerName:
+  //           bookingGroup?.leadTravelerName || booking.userName,
+
+  //         leadTravelerPhone:
+  //           bookingGroup?.leadTravelerPhone || booking.phone,
+
+  //         leadTravelerEmail:
+  //           bookingGroup?.leadTravelerEmail || null,
+
+  //         travelerCount: travelers.length || 1,
+
+  //         travelers: travelers.map((t) => ({
+  //           id: t.id,
+  //           fullName: t.fullName,
+  //           email: t.email,
+  //           phone: t.phone,
+  //           age: t.age,
+  //           gender: t.gender,
+  //           medicalIssues: t.medicalIssues,
+  //           emergencyPhone: t.emergencyPhone,
+  //         })),
+
+  //         activityName: activity?.activityName || null,
+
+  //         slotTiming: activity?.slotTiming || null,
+  //       };
+  //     })
+  //   );
+
+  //   return NextResponse.json(enriched);
+
+  // } catch (error) {
+  //   console.error("Vendor bookings error:", error);
+
+  //   return NextResponse.json(
+  //     {
+  //       success: false,
+  //       message: "Failed to fetch bookings",
+  //     },
+  //     { status: 500 }
+  //   );
+  // }
+// }
