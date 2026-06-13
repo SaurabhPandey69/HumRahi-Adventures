@@ -28,15 +28,24 @@ export async function GET(req: Request) {
       },
     });
 
+    console.log("Bookings Count:", bookings.length);
+    
+
     // 🔥 Enrich bookings
-    const enriched = await Promise.all(
-      bookings.map(async (booking) => {
-        const vendor = await prisma.vendor.findUnique({
+
+    const vendor = await prisma.vendor.findUnique({
           where: {
             id: vendorId,
           },
         });
+    
+    if (!vendor) {
+      return NextResponse.json([]);
+    }
 
+    const enriched = await Promise.all(
+      bookings.map(async (booking) => {
+        
         const activity = vendor
           ? await prisma.bookingActivity.findFirst({
               where: {
