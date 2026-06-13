@@ -15,18 +15,29 @@ export async function POST(req: Request) {
     draftId,
   } = body;
 
-  // 🔥 ENV SWITCH (test / prod)
-    const isProd = process.env.NODE_ENV === "production";
+  // // 🔥 ENV SWITCH (test / prod)
+  //   const isProd = process.env.NODE_ENV === "production";
 
-    const secret = isProd
-      ? process.env.RAZORPAY_KEY_SECRET_LIVE!
-      : process.env.RAZORPAY_KEY_SECRET_TEST!;
+  //   const secret = isProd
+  //     ? process.env.RAZORPAY_KEY_SECRET_LIVE!
+  //     : process.env.RAZORPAY_KEY_SECRET_TEST!;
+  
+  const secret = process.env.RAZORPAY_KEY_SECRET_TEST!;
+
+  console.log("🔥 FORCE TEST VERIFY MODE");
+
 
   // 🔐 SIGNATURE VERIFY  
   const generated_signature = crypto
     .createHmac("sha256", secret)
     .update(razorpay_order_id + "|" + razorpay_payment_id)
     .digest("hex");
+  
+  console.log("Order ID:", razorpay_order_id);
+  console.log("Payment ID:", razorpay_payment_id);
+  console.log("Razorpay Signature:", razorpay_signature);
+  console.log("Generated Signature:", generated_signature);
+
 
   // ✅ VERIFY SIGNATURE
   if (generated_signature !== razorpay_signature) {
