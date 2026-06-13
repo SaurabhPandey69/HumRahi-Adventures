@@ -66,7 +66,9 @@ export async function sendVendorEmail(vendor: any, booking: any) {
 // =====================================
 // 🔥 HOT LEAD EMAIL (NODEMAILER VERSION)
 // =====================================
-export async function sendHotLeadEmail(email: string) {
+export async function sendHotLeadEmail(email: string,
+  draftId: string
+) {
   try {
 
     const baseUrl =
