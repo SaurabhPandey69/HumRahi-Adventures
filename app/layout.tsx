@@ -8,9 +8,17 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.aihumrahiadventure.com"),
+
   title: "HumRahi Adventures | AI Powered Adventure Travel",
   description:
     "Book Paragliding, Motor Paragliding & Adventure Experiences powered by HumRahi AI",
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+  
   keywords: [
     "Paragliding India",
     "Motor Paragliding Rajasthan",
